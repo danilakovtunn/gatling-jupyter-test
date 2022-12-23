@@ -32,15 +32,11 @@ class ComputerDatabaseSimulation extends Simulation {
 
   val transform_json_to_list = exec(session => {
     var code = new ListBuffer[String]()
-    for (cell <- session("ipynb_json").as[Vector[Map[String, String]]] if cell("source").length() > 0) 
-      code += cell("source")
+    for (cell <- session("ipynb_json").as[Seq[Map[String, String]]] if cell("source").length() > 0)
+      code += cell("source").replace("\n", "\\n").replace("\"", "\\\"")
     val newSession = session.set("code", code.toList)
     newSession
   })
-
-  val check_criterion = ws.checkTextMessage("Cell Done")
-    .matching(jsonPath("$.msg_type").is("execute_reply"))
-    .check(jsonPath("$.msg_type").is("execute_reply"))
   
   val delete_kernel = exec(http("Delete Kernel")
     .delete("http://localhost:8888/api/kernels/#{kernel_id}")
@@ -50,10 +46,14 @@ class ComputerDatabaseSimulation extends Simulation {
 
   val printing = exec(session => {
       println("Some useful print:")
-      println(session("code").as[String])
+      println(session("element").as[String])
       session
     }  
   )
+
+  val check_criterion = ws.checkTextMessage("Cell Done")
+    .matching(jsonPath("$.msg_type").is("execute_reply"))
+    //.check(jsonPath("$.msg_type").is("execute_reply"))
 
   val connect_ws = exec(ws("Connect WS")
     .connect("ws://localhost:8888/api/kernels/#{kernel_id}/channels")
@@ -61,7 +61,7 @@ class ComputerDatabaseSimulation extends Simulation {
   )
 
   val run_single_cell = exec(ws("Run single cell")
-    .sendText("""{"header": {"msg_id": "d509fc787aef11eda61129b76ab5a50d", "username": "test", "session": "d509fc797aef11eda61129b76ab5a50d", "data": "2022-12-13T17:10:00.834010", "msg_type": "execute_request", "version": "5.0"}, "parent_header": {"msg_id": "d509fc787aef11eda61129b76ab5a50d", "username": "test", "session": "d509fc797aef11eda61129b76ab5a50d", "data": "2022-12-13T17:10:00.834010", "msg_type": "execute_request", "version": "5.0"}, "metadata": {}, "content": {"code": "#{element}", "silent": false}}""")
+    .sendText("""{"header": {"msg_id": "57a169e882c711ed839415fac3fb8477", "username": "test", "session": "57a169e982c711ed839415fac3fb8477", "data": "2022-12-23T16:40:19.867204", "msg_type": "execute_request", "version": "5.0"}, "parent_header": {"msg_id": "57a169e882c711ed839415fac3fb8477", "username": "test", "session": "57a169e982c711ed839415fac3fb8477", "data": "2022-12-23T16:40:19.867204", "msg_type": "execute_request", "version": "5.0"}, "metadata": {}, "content": {"code": "#{element}", "silent": false}}""")
     .await(51)(check_criterion)
   )
 
@@ -76,6 +76,7 @@ class ComputerDatabaseSimulation extends Simulation {
     .exec(connect_ws)
     .foreach("#{code}", "element") {
       exec(run_single_cell)
+      //.exec(printing)
     }
     .exec(close_connection_ws)
     .exec(delete_kernel)
