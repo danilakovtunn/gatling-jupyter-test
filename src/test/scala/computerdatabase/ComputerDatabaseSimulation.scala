@@ -2,13 +2,21 @@ package computerdatabase
 
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
+import org.json4s._
+import org.json4s.jackson.JsonMethods._
+
 
 import java.util.concurrent.ThreadLocalRandom
 import scala.collection.mutable.ListBuffer
 
 
 class ComputerDatabaseSimulation extends Simulation {
- 
+
+  def jsonStrToMap(jsonStr: String): Map[String, Any] = {
+    implicit val formats = org.json4s.DefaultFormats
+    parse(jsonStr).extract[Map[String, Any]]
+  } 
+
   val headers = Map(
     "Authorization"->"Token bfada895cda3ccf6854f0405ed15117ac0fa8b114537cd40"
   )
@@ -22,6 +30,21 @@ class ComputerDatabaseSimulation extends Simulation {
     .check(jsonPath("$.id").saveAs("kernel_id"))
     .check(status is 201)
   )
+
+  val read_ipynb_local = exec(session => {
+    var code = new ListBuffer[String]()
+    val source = scala.io.Source.fromFile("/home/danila/ispras/test-jupyter/Untitled.ipynb")
+    val lines = try source.mkString.replace("\n", "").replace(" ", "") finally source.close()
+
+    //val data = read(lines) //[Map[String, Seq[Map[String, String]]]](lines)
+    val cells = jsonStrToMap(lines)("cells") //.asInstanceOf[Seq[Map[String, String]]]
+    println(cells)
+    // for (cell <- cells if cell("source").length() > 0)
+    //   code += cell("source").replace("\n", "\\n").replace("\"", "\\\"")
+    // val newSession = session.set("code", code.toList)
+    // newSession
+    session
+  })
 
   val get_ipynb_json = exec(http("Get notebook Cells")
     .get("http://localhost:8888/api/contents/Untitled.ipynb")
@@ -69,7 +92,7 @@ class ComputerDatabaseSimulation extends Simulation {
     .close  
   )
 
-  val run_all = scenario("User")
+  val run_all_from_remote = scenario("User_remote")
     .exec(create_kernel)
     .exec(get_ipynb_json)
     .exec(transform_json_to_list)
@@ -81,8 +104,19 @@ class ComputerDatabaseSimulation extends Simulation {
     .exec(close_connection_ws)
     .exec(delete_kernel)
 
+  val run_all_from_local = scenario("User_local")
+    .exec(create_kernel)
+    .exec(read_ipynb_local)
+    .exec(connect_ws)
+    .foreach("#{code}", "element") {
+      exec(run_single_cell)
+      .exec(printing)
+    }
+    .exec(close_connection_ws)
+    .exec(delete_kernel)
+
   setUp(
-    run_all.inject(rampUsers(4).during(10)),
+    run_all_from_local.inject(rampUsers(1).during(10)),
   ).protocols(httpProtocol)
 
 }
