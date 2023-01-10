@@ -34,16 +34,17 @@ class ComputerDatabaseSimulation extends Simulation {
   val read_ipynb_local = exec(session => {
     var code = new ListBuffer[String]()
     val source = scala.io.Source.fromFile("/home/danila/ispras/test-jupyter/Untitled.ipynb")
-    val lines = try source.mkString.replace("\n", "").replace(" ", "") finally source.close()
+    val lines = try source.mkString finally source.close()
 
-    //val data = read(lines) //[Map[String, Seq[Map[String, String]]]](lines)
-    val cells = jsonStrToMap(lines)("cells") //.asInstanceOf[Seq[Map[String, String]]]
-    println(cells)
-    // for (cell <- cells if cell("source").length() > 0)
-    //   code += cell("source").replace("\n", "\\n").replace("\"", "\\\"")
-    // val newSession = session.set("code", code.toList)
-    // newSession
-    session
+    val cells = jsonStrToMap(lines).asInstanceOf[Map[String, Any]]("cells").asInstanceOf[List[Map[String, List[String]]]]
+    for (not_format_cell <- cells if not_format_cell("source").length > 0) {
+      var format_cell = ""
+      for (cell_string <- not_format_cell("source"))
+        format_cell += cell_string
+      code += format_cell.replace("\n", "\\n")
+    }
+    val newSession = session.set("code", code.toList)
+    newSession
   })
 
   val get_ipynb_json = exec(http("Get notebook Cells")
@@ -92,6 +93,7 @@ class ComputerDatabaseSimulation extends Simulation {
     .close  
   )
 
+
   val run_all_from_remote = scenario("User_remote")
     .exec(create_kernel)
     .exec(get_ipynb_json)
@@ -103,6 +105,7 @@ class ComputerDatabaseSimulation extends Simulation {
     }
     .exec(close_connection_ws)
     .exec(delete_kernel)
+
 
   val run_all_from_local = scenario("User_local")
     .exec(create_kernel)
