@@ -26,8 +26,8 @@ class ComputerDatabaseSimulation extends Simulation {
 
   val create_jupyterlab = exec(http("create jupyterlab")
     .post("http://10.100.203.110:5000/creating")
-    .headers(Map("Content-Type" -> "application/json"))
     .body(StringBody("""{"args": {"token": "2bc2c33cb44e56cb9f1e191238ffb78564675fa1", "login": "test4@localhost", "password": "test", "ipynb": {"s3id": "bucket1", "human-name": "my-ipynb-dir1", "mode": "rw"}, "input": [{"s3id": "bucket2", "human-name": "my-input-dataset1", "mode": "r"}], "output": {"s3id": "bucket3", "human-name": "my-output-bucket1","mode": "rw"}}, "system": "jupyterlab", "flavor": "cpu"} """))
+    .headers(Map("Content-Type" -> "application/json"))
     .check(jsonPath("$.sevice_url").saveAs("jupyter_url"))
     .check(jsonPath("$.token").saveAs("token"))
   )
