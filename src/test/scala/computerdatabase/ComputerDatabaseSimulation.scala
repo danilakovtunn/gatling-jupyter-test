@@ -24,9 +24,17 @@ class ComputerDatabaseSimulation extends Simulation {
   val httpProtocol =
     http.baseUrl("http://localhost:8888")
 
+  val create_jupyterlab = exec(http("create jupyterlab")
+    .post("http://10.100.203.110:5000/creating")
+    .headers(Map("Content-Type" -> "application/json"))
+    .body(RawFileBody("create_jupyterlab.json"))
+    .check(jsonPath(".sevice_url").saveAs("jupyter_url"))
+    .check(jsonPath(".token").saveAs("token"))
+  )
+  
   val create_kernel = exec(http("Create Kernel")
-    .post("http://localhost:8888/api/kernels")
-    .headers(headers)
+    .post("#{jupyter_url}" + "api/kernels")
+    .headers(Map("Authorization"->"Token #{token}"))
     .check(jsonPath("$.id").saveAs("kernel_id"))
     .check(status is 201)
   )
@@ -48,8 +56,8 @@ class ComputerDatabaseSimulation extends Simulation {
   })
 
   val get_ipynb_json = exec(http("Get notebook Cells")
-    .get("http://localhost:8888/api/contents/Untitled.ipynb")
-    .headers(headers)
+    .get("#{jupyter_url}" + "api/contents/Untitled.ipynb")
+    .headers(Map("Authorization"->"Token #{token}"))
     .check(jsonPath("$.content.cells").ofType[Seq[Any]].saveAs("ipynb_json"))
     .check(status is 200)
   )
@@ -63,8 +71,8 @@ class ComputerDatabaseSimulation extends Simulation {
   })
   
   val delete_kernel = exec(http("Delete Kernel")
-    .delete("http://localhost:8888/api/kernels/#{kernel_id}")
-    .headers(headers)
+    .delete("#{jupyter_url}" + "api/kernels/#{kernel_id}")
+    .headers(Map("Authorization"->"Token #{token}"))
     .check(status is 204)
   )
 
@@ -76,12 +84,12 @@ class ComputerDatabaseSimulation extends Simulation {
   )
 
   val check_criterion = ws.checkTextMessage("Cell Done")
-    .matching(jsonPath("$.msg_type").is("execute_reply"))
-    //.check(jsonPath("$.msg_type").is("execute_reply"))
+    .matching(jsonPath("$.msg_type").is("execute_reply")
+  )
 
   val connect_ws = exec(ws("Connect WS")
     .connect("ws://localhost:8888/api/kernels/#{kernel_id}/channels")
-    .headers(headers)
+    .headers(Map("Authorization"->"Token #{token}"))
   )
 
   val run_single_cell = exec(ws("Run single cell")
@@ -113,7 +121,7 @@ class ComputerDatabaseSimulation extends Simulation {
     .exec(connect_ws)
     .foreach("#{code}", "element") {
       exec(run_single_cell)
-      .exec(printing)
+      //.exec(printing)
     }
     .exec(close_connection_ws)
     .exec(delete_kernel)
