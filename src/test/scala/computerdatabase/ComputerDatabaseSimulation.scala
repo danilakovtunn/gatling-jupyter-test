@@ -28,8 +28,8 @@ class ComputerDatabaseSimulation extends Simulation {
     .post("http://10.100.203.110:5000/creating")
     .headers(Map("Content-Type" -> "application/json"))
     .body(RawFileBody("create_jupyterlab.json"))
-    .check(jsonPath(".sevice_url").saveAs("jupyter_url"))
-    .check(jsonPath(".token").saveAs("token"))
+    .check(jsonPath("$.sevice_url").saveAs("jupyter_url"))
+    .check(jsonPath("$.token").saveAs("token"))
   )
   
   val create_kernel = exec(http("Create Kernel")
