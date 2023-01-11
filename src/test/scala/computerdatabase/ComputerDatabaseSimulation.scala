@@ -103,6 +103,7 @@ class ComputerDatabaseSimulation extends Simulation {
 
 
   val run_all_from_remote = scenario("User_remote")
+    .exec(create_jupyterlab)
     .exec(create_kernel)
     .exec(get_ipynb_json)
     .exec(transform_json_to_list)
@@ -116,6 +117,7 @@ class ComputerDatabaseSimulation extends Simulation {
 
 
   val run_all_from_local = scenario("User_local")
+    .exec(create_jupyterlab)
     .exec(create_kernel)
     .exec(read_ipynb_local)
     .exec(connect_ws)
