@@ -18,10 +18,17 @@ class ComputerDatabaseSimulation extends Simulation {
   } 
 
 
+  val printing = exec(session => {
+      println("usage filename: :")
+      println(session("filename").as[String])
+      session
+    }  
+  )
+
   val httpProtocol =
     http.baseUrl("http://localhost:8888")
   
-  val feeder = csv("request.csv").circular()
+  val feeder = csv("request.csv").random
 
   val create_jupyterlab = exec(
     feed(feeder)
@@ -31,12 +38,13 @@ class ComputerDatabaseSimulation extends Simulation {
       .body(RawFileBody("#{filename}"))
       .check(jsonPath("$.service_url").saveAs("jupyter_url"))
       .check(jsonPath("$.token").saveAs("token"))
-      .check(bodyString.saveAs("all"))
     )
+    .exec(printing)
   )
   
   val create_kernel = exec(http("Create Kernel")
     .post("#{jupyter_url}" + "api/kernels")
+    .requestTimeout(180)
     .headers(Map("Authorization"->"Token #{token}"))
     .check(jsonPath("$.id").saveAs("kernel_id"))
     .check(status is 201)
@@ -79,13 +87,6 @@ class ComputerDatabaseSimulation extends Simulation {
     .check(status is 204)
   )
 
-  val printing = exec(session => {
-      println("Sjupyter-lab url:")
-      println(session("jupyter_url").as[String])
-      session
-    }  
-  )
-
   val check_criterion = ws.checkTextMessage("Cell Done")
     .matching(jsonPath("$.msg_type").is("execute_reply")
   )
@@ -111,7 +112,6 @@ class ComputerDatabaseSimulation extends Simulation {
     .exec(get_ipynb_json)
     .exec(transform_json_to_list)
     .exec(connect_ws)
-    .exec(printing)
     .foreach("#{code}", "element") {
       exec(run_single_cell)
     }
@@ -124,7 +124,6 @@ class ComputerDatabaseSimulation extends Simulation {
     .exec(create_kernel)
     .exec(read_ipynb_local)
     .exec(connect_ws)
-    .exec(printing)
     .foreach("#{code}", "element") {
       exec(run_single_cell)
     }
@@ -132,7 +131,7 @@ class ComputerDatabaseSimulation extends Simulation {
     .exec(delete_kernel)
 
   setUp(
-    run_all_from_local.inject(rampUsers(3).during(10)),
+    run_all_from_local.inject(rampUsers(2).during(30)),
   ).protocols(httpProtocol)
 
 }
