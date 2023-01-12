@@ -1,0 +1,26 @@
+{"args": 
+ {
+  "token": "2bc2c33cb44e56cb9f1e191238ffb78564675fa1", 
+  "login": "test4@localhost", 
+  "password": "test", 
+  "ipynb": {
+   "s3id": "bucket1test2",
+   "human-name": "my-ipynb-dir1",
+   "mode": "rw"
+  },
+  "input": [
+   {
+    "s3id": "bucket2",
+    "human-name": "my-input-dataset1",
+    "mode": "r"
+   }
+  ],
+  "output": {
+   "s3id": "bucket3",
+   "human-name": "my-output-bucket1",
+   "mode": "rw"
+  }
+ }, 
+ "system": "jupyterlab", 
+ "flavor": "cpu"
+}
