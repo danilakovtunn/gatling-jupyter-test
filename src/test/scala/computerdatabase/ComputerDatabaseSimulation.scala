@@ -17,20 +17,22 @@ class ComputerDatabaseSimulation extends Simulation {
     parse(jsonStr).extract[Map[String, Any]]
   } 
 
-  val headers = Map(
-    "Authorization"->"Token bfada895cda3ccf6854f0405ed15117ac0fa8b114537cd40"
-  )
 
   val httpProtocol =
     http.baseUrl("http://localhost:8888")
+  
+  val feeder = csv("request.csv").circular()
 
-  val create_jupyterlab = exec(http("create jupyterlab")
-    .post("http://10.100.203.110:5000/creating")
-    .headers(Map("Content-Type" -> "application/json"))
-    .body(RawFileBody("create_jupyterlab.json"))
-    .check(jsonPath("$.service_url").saveAs("jupyter_url"))
-    .check(jsonPath("$.token").saveAs("token"))
-    .check(bodyString.saveAs("all"))
+  val create_jupyterlab = exec(
+    feed(feeder)
+    .exec(http("create jupyterlab")
+      .post("http://10.100.203.110:5000/creating")
+      .headers(Map("Content-Type" -> "application/json"))
+      .body(RawFileBody("#{filename}"))
+      .check(jsonPath("$.service_url").saveAs("jupyter_url"))
+      .check(jsonPath("$.token").saveAs("token"))
+      .check(bodyString.saveAs("all"))
+    )
   )
   
   val create_kernel = exec(http("Create Kernel")
@@ -78,8 +80,8 @@ class ComputerDatabaseSimulation extends Simulation {
   )
 
   val printing = exec(session => {
-      println("Some useful print:")
-      println(session("element").as[String])
+      println("Sjupyter-lab url:")
+      println(session("jupyter_url").as[String])
       session
     }  
   )
@@ -109,9 +111,9 @@ class ComputerDatabaseSimulation extends Simulation {
     .exec(get_ipynb_json)
     .exec(transform_json_to_list)
     .exec(connect_ws)
+    .exec(printing)
     .foreach("#{code}", "element") {
       exec(run_single_cell)
-      //.exec(printing)
     }
     .exec(close_connection_ws)
     .exec(delete_kernel)
@@ -122,9 +124,9 @@ class ComputerDatabaseSimulation extends Simulation {
     .exec(create_kernel)
     .exec(read_ipynb_local)
     .exec(connect_ws)
+    .exec(printing)
     .foreach("#{code}", "element") {
       exec(run_single_cell)
-      //.exec(printing)
     }
     .exec(close_connection_ws)
     .exec(delete_kernel)
