@@ -21,6 +21,7 @@ class ComputerDatabaseSimulation extends Simulation {
   val printing = exec(session => {
       println("usage filename: :")
       println(session("filename").as[String])
+      println(session("all").as[String])
       session
     }  
   )
@@ -38,8 +39,8 @@ class ComputerDatabaseSimulation extends Simulation {
       .body(RawFileBody("#{filename}"))
       .check(jsonPath("$.service_url").saveAs("jupyter_url"))
       .check(jsonPath("$.token").saveAs("token"))
+      .check(bodyString.saveAs("all"))
     )
-    .exec(printing)
   )
   
   val create_kernel = exec(http("Create Kernel")
@@ -121,6 +122,7 @@ class ComputerDatabaseSimulation extends Simulation {
 
   val run_all_from_local = scenario("User_local")
     .exec(create_jupyterlab)
+    .exec(printing)
     .exec(create_kernel)
     .exec(read_ipynb_local)
     .exec(connect_ws)
@@ -131,7 +133,7 @@ class ComputerDatabaseSimulation extends Simulation {
     .exec(delete_kernel)
 
   setUp(
-    run_all_from_local.inject(rampUsers(2).during(30)),
+    run_all_from_local.inject(rampUsers(10).during(30)),
   ).protocols(httpProtocol)
 
 }
