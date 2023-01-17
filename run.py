@@ -4,7 +4,16 @@ import os
 
 
 start = datetime.datetime.now().isoformat(sep=' ', timespec='seconds')
-pipe = subprocess.Popen(('sbt', 'Gatling/test'), stdout=subprocess.PIPE)
+pipe = subprocess.Popen(
+    ('sbt', 
+    '-Djaas_url=10.100.203.110', 
+    '-Dport=5000', 
+    '-Dprotocol=http',
+    '-Dusers=5',
+    '-Dramp=30', 
+    'Gatling/test'), 
+    stdout=subprocess.PIPE
+)
 x = pipe.stdout.readlines()
 
 for i in x:

@@ -34,7 +34,7 @@ class ComputerDatabaseSimulation extends Simulation {
   val create_jupyterlab = exec(
     feed(feeder)
     .exec(http("create jupyterlab")
-      .post("http://10.100.203.110:5000/creating")
+      .post(System.getProperty("protocol") + "://" + System.getProperty("jaas_url") + ":" + System.getProperty("port") + "/creating")
       .headers(Map("Content-Type" -> "application/json"))
       .body(RawFileBody("#{filename}"))
       .check(jsonPath("$.service_url").saveAs("jupyter_url"))
@@ -133,8 +133,7 @@ class ComputerDatabaseSimulation extends Simulation {
     .exec(delete_kernel)
 
   setUp(
-    //run_all_from_local.inject(rampUsers(10).during(30)),
-    run_all_from_local.inject(atOnceUsers(10)),
+    run_all_from_local.inject(rampUsers(Integer.getInteger("users", 1)).during(Integer.getInteger("ramp", 0)))
   ).protocols(httpProtocol)
 
 }
