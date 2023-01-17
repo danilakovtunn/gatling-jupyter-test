@@ -43,7 +43,7 @@ git clone https://github.com/danilakovtunn/gatling-jupyter-test
 ## Запуск
 Для запуска лучше всего использовать скрипт run.py
 ```sh
-usage: run.py [-h] [--jaas_ip JAAS_IP] [--port PORT] [--protocol {http,https}]
+usage: python3 run.py [-h] [--jaas_ip JAAS_IP] [--port PORT] [--protocol {http,https}]
               [--users USERS] [--ramp RAMP]
 
 optional arguments:
