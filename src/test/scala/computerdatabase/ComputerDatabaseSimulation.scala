@@ -133,7 +133,8 @@ class ComputerDatabaseSimulation extends Simulation {
     .exec(delete_kernel)
 
   setUp(
-    run_all_from_local.inject(rampUsers(10).during(30)),
+    //run_all_from_local.inject(rampUsers(10).during(30)),
+    run_all_from_local.inject(atOnceUsers(10)),
   ).protocols(httpProtocol)
 
 }

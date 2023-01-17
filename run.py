@@ -10,7 +10,7 @@ x = pipe.stdout.readlines()
 for i in x:
     print(i.decode(), end='')
 
-if x[-8].split()[2] != b'0':
+if len(x[-8].split()) < 3 or x[-8].split()[2] != b'0':
     finish = datetime.datetime.now().isoformat(sep=' ', timespec='seconds')
     error_files = list(filter(lambda x: x[:-4].isdecimal() and x[-4:] == '.txt', os.listdir('datetime_errors')))
     number = len(error_files) + 1
