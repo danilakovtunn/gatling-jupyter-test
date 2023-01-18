@@ -36,7 +36,7 @@ class CreateJupyterlabSimpulation extends Simulation {
     .exec(http("create jupyterlab")
       .post(System.getProperty("protocol") + "://" + System.getProperty("jaas_url") + ":" + System.getProperty("port") + "/creating")
       .headers(Map("Content-Type" -> "application/json"))
-      .body(RawFileBody("#{filename}"))
+      .body(RawFileBody("#{jupyterlab}"))
       .check(jsonPath("$.service_url").saveAs("jupyter_url"))
       .check(jsonPath("$.token").saveAs("token"))
       .check(bodyString.saveAs("all"))
