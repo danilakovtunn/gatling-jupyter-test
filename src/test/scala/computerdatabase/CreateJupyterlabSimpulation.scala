@@ -1,5 +1,3 @@
-
-
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
 import org.json4s._
@@ -20,7 +18,7 @@ class CreateJupyterlabSimpulation extends Simulation {
 
   val printing = exec(session => {
       println("usage filename: :")
-      println(session("filename").as[String])
+      println(session("jupyterlab").as[String])
       println(session("all").as[String])
       session
     }  
@@ -133,7 +131,7 @@ class CreateJupyterlabSimpulation extends Simulation {
     .exec(delete_kernel)
 
   setUp(
-    run_all_from_local.inject(rampUsers(Integer.getInteger("users", 1)).during(Integer.getInteger("ramp", 0)))
+    run_all_from_local.inject(rampUsers(Integer.getInteger("users", 5)).during(Integer.getInteger("ramp", 0)))
   ).protocols(httpProtocol)
 
 }
