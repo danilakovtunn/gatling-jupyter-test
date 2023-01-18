@@ -10,7 +10,7 @@ import java.util.concurrent.ThreadLocalRandom
 import scala.collection.mutable.ListBuffer
 
 
-class ComputerDatabaseSimulation extends Simulation {
+class CreateLabelStudioSimpulation extends Simulation {
 
   def jsonStrToMap(jsonStr: String): Map[String, Any] = {
     implicit val formats = org.json4s.DefaultFormats
