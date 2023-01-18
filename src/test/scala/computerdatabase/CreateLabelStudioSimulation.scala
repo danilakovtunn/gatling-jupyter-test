@@ -28,13 +28,13 @@ class CreateLabelStudioSimulation extends Simulation {
   )
 
   val check_register = exec(http("check register page")
-    .get(session => session("label_studio_url").as[String].subSequence(0, session("label_studio_url").as[String].length - 1))
-  )
+      .get("#{label_studio_url}")
+    )
   
   val run_all_from_local = scenario("test label_studio as a service")
     .exec(create_jupyterlab)
     .exec(printing)
-
+    .exec(check_register)
 
   setUp(
     run_all_from_local.inject(rampUsers(Integer.getInteger("users", 1)).during(Integer.getInteger("ramp", 0)))
