@@ -1,8 +1,7 @@
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
 
-
-class CreateLabelStudioSimpulation extends Simulation {
+class CreateLabelStudioSimulation extends Simulation {
 
   val printing = exec(session => {
       println("usage filename:")

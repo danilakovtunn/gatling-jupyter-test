@@ -8,7 +8,7 @@ import java.util.concurrent.ThreadLocalRandom
 import scala.collection.mutable.ListBuffer
 
 
-class CreateJupyterlabSimpulation extends Simulation {
+class CreateJupyterlabSimulation extends Simulation {
 
   def jsonStrToMap(jsonStr: String): Map[String, Any] = {
     implicit val formats = org.json4s.DefaultFormats

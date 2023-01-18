@@ -55,7 +55,7 @@ def main():
         '-Dprotocol=' + protocol,
         '-Dusers=' + str(users),
         '-Dramp=' + str(ramp), 
-        'Gatling/testOnly CreateJupyterlabSimpulation'), 
+        'Gatling/testOnly CreateJupyterlabSimulation'), 
         stdout=subprocess.PIPE
     )
     x = pipe.stdout.readlines()
