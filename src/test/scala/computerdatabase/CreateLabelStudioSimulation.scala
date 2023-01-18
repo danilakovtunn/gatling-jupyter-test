@@ -14,7 +14,7 @@ class CreateLabelStudioSimulation extends Simulation {
   val httpProtocol =
     http.baseUrl("http://localhost:8888")
   
-  val feeder = csv("request.csv").random
+  val feeder = csv("request.csv").shuffle
 
   val create_jupyterlab = exec(
     feed(feeder)
