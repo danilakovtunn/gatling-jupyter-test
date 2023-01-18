@@ -43,11 +43,14 @@ git clone https://github.com/danilakovtunn/gatling-jupyter-test
 ## Запуск
 Для запуска лучше всего использовать скрипт run.py
 ```sh
-usage: python3 run.py [-h] [--jaas_ip JAAS_IP] [--port PORT] [--protocol {http,https}]
+usage: python3 run.py [-h] [--test_system {jupyterlab,label_studio,both}]
+              [--jaas_ip JAAS_IP] [--port PORT] [--protocol {http,https}]
               [--users USERS] [--ramp RAMP]
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
+  --test_system {jupyterlab,label_studio,both}
+                        specify SUT (system under test)
   --jaas_ip JAAS_IP     ip address where Jupyter As A Servise is located
   --port PORT           port to connect to JAAS
   --protocol {http,https}
@@ -55,6 +58,7 @@ optional arguments:
   --users USERS         number of virtual users that will load the server
   --ramp RAMP           given number of users distributed evenly on a time
                         window of a given ramp
+
 ```
 
 В результате появится 
