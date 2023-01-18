@@ -43,7 +43,6 @@ class CreateJupyterlabSimulation extends Simulation {
   
   val create_kernel = exec(http("Create Kernel")
     .post("#{jupyter_url}" + "api/kernels")
-    .requestTimeout(180)
     .headers(Map("Authorization"->"Token #{token}"))
     .check(jsonPath("$.id").saveAs("kernel_id"))
     .check(status is 201)
