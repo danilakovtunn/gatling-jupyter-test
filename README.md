@@ -8,14 +8,14 @@
 
 ## Установка
 
-python3
+`1)` python3
 
-Необходимо установить JDK. Например,
+`2)` Необходимо установить JDK. Например,
 ```sh
 sudo apt install default-jre
 ```
 
-Далее необходимо установить [sbt](https://www.scala-sbt.org/download.html)
+`3)` Далее необходимо установить [sbt](https://www.scala-sbt.org/download.html)
 - Установка для linux (deb):
 ```sh
 echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | sudo tee /etc/apt/sources.list.d/sbt.list
@@ -33,12 +33,12 @@ sudo mv sbt-rpm.repo /etc/yum.repos.d/
 sudo yum install sbt
 ```
 
-Для pагрузки тестируемых сценариев необходимо просто скопировать репозиторий 
+`4)` Для использования тестируемых сценариев необходимо просто скопировать репозиторий 
 ```sh 
 git clone https://github.com/danilakovtunn/gatling-jupyter-test
 ```
 
-Установка завершена
+`5)` Установка завершена
 
 ## Запуск
 Для запуска лучше всего использовать скрипт run.py
