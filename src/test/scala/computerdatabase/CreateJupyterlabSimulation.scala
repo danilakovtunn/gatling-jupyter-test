@@ -17,8 +17,8 @@ class CreateJupyterlabSimulation extends Simulation {
 
 
   val printing = exec(session => {
-      println("usage filename: :")
-      println(session("jupyterlab").as[String])
+      println("usage s3id: ")
+      println(session("s3id").as[String])
       println(session("all").as[String])
       session
     }  
