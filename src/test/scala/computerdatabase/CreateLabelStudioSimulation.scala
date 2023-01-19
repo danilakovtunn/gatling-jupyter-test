@@ -5,7 +5,7 @@ class CreateLabelStudioSimulation extends Simulation {
 
   val printing = exec(session => {
       println("usage filename:")
-      println(session("label_studio").as[String])
+      println(session("token").as[String])
       println(session("all").as[String])
       session
     }  
@@ -14,14 +14,14 @@ class CreateLabelStudioSimulation extends Simulation {
   val httpProtocol =
     http.baseUrl("http://localhost:8888")
   
-  val feeder = csv("request.csv").shuffle
+  val feeder = csv("label_studio.csv").shuffle
 
   val create_jupyterlab = exec(
     feed(feeder)
     .exec(http("create label studio")
       .post(System.getProperty("protocol") + "://" + System.getProperty("jaas_url") + ":" + System.getProperty("port") + "/creating")
       .headers(Map("Content-Type" -> "application/json"))
-      .body(RawFileBody("#{label_studio}"))
+      .body(ElFileBody("create_label_studio.json"))
       .check(jsonPath("$.service_url").saveAs("label_studio_url"))
       .check(bodyString.saveAs("all"))
     )

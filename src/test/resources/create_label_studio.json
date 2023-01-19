@@ -1,10 +1,10 @@
 {"args": 
  {
-  "token": "2bc2c33cb44e56cb9f1e191238ffb78564675fa8", 
+  "token": "#{token}", 
   "login": "test4@localhost", 
   "password": "test", 
   "ipynb": {
-   "s3id": "bucket1test8",
+   "s3id": "bucket1test1",
    "human-name": "my-ipynb-dir1",
    "mode": "rw"
   },
