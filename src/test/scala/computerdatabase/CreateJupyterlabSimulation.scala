@@ -27,14 +27,14 @@ class CreateJupyterlabSimulation extends Simulation {
   val httpProtocol =
     http.baseUrl("http://localhost:8888")
   
-  val feeder = csv("request.csv").random
+  val feeder = csv("jupyterlab.csv").random
 
   val create_jupyterlab = exec(
     feed(feeder)
     .exec(http("create jupyterlab")
       .post(System.getProperty("protocol") + "://" + System.getProperty("jaas_url") + ":" + System.getProperty("port") + "/creating")
       .headers(Map("Content-Type" -> "application/json"))
-      .body(RawFileBody("#{jupyterlab}"))
+      .body(ElFileBody("create_jupyterlab.json"))
       .check(jsonPath("$.service_url").saveAs("jupyter_url"))
       .check(jsonPath("$.token").saveAs("token"))
       .check(bodyString.saveAs("all"))
