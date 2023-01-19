@@ -95,7 +95,7 @@ class CreateJupyterlabSimulation extends Simulation {
   )
 
   val run_single_cell = exec(ws("Run single cell")
-    .sendText("""{"header": {"msg_id": "57a169e882c711ed839415fac3fb8477", "username": "test", "session": "57a169e982c711ed839415fac3fb8477", "data": "2022-12-23T16:40:19.867204", "msg_type": "execute_request", "version": "5.0"}, "parent_header": {"msg_id": "57a169e882c711ed839415fac3fb8477", "username": "test", "session": "57a169e982c711ed839415fac3fb8477", "data": "2022-12-23T16:40:19.867204", "msg_type": "execute_request", "version": "5.0"}, "metadata": {}, "content": {"code": "#{element}", "silent": false}}""")
+    .sendText(ElFileBody("ws_text.json"))
     .await(51)(check_criterion)
   )
 
