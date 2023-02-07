@@ -27,10 +27,10 @@ class CreateJupyterlabSimulation extends Simulation {
   val httpProtocol =
     http.baseUrl("http://localhost:8888")
   
-  val feeder = csv("jupyterlab.csv").random
+  val feeder_jupyterlab = csv("jupyterlab.csv").random
 
   val create_jupyterlab = exec(
-    feed(feeder)
+    feed(feeder_jupyterlab)
     .exec(http("create jupyterlab")
       .post(System.getProperty("protocol") + "://" + System.getProperty("jaas_url") + ":" + System.getProperty("port") + "/creating")
       .headers(Map("Content-Type" -> "application/json"))
@@ -48,21 +48,26 @@ class CreateJupyterlabSimulation extends Simulation {
     .check(status is 201)
   )
 
-  val read_ipynb_local = exec(session => {
-    var code = new ListBuffer[String]()
-    val source = scala.io.Source.fromFile("/home/danila/diplom/automatic_user/test/Untitled.ipynb")
-    val lines = try source.mkString finally source.close()
+  val feeder_notebook = csv("notebooks.csv").random
 
-    val cells = jsonStrToMap(lines).asInstanceOf[Map[String, Any]]("cells").asInstanceOf[List[Map[String, List[String]]]]
-    for (not_format_cell <- cells if not_format_cell("source").length > 0) {
-      var format_cell = ""
-      for (cell_string <- not_format_cell("source"))
-        format_cell += cell_string
-      code += format_cell.replace("\n", "\\n").replace("\"", "\\\"")
-    }
-    val newSession = session.set("code", code.toList)
-    newSession
-  })
+  val read_ipynb_local = exec(
+    feed(feeder_notebooks)
+      .exec(session => {
+      var code = new ListBuffer[String]()
+      val source = scala.io.Source.fromFile("src/test/resources/notebooks/" + session("notebook").as[String])
+      val lines = try source.mkString finally source.close()
+
+      val cells = jsonStrToMap(lines).asInstanceOf[Map[String, Any]]("cells").asInstanceOf[List[Map[String, List[String]]]]
+      for (not_format_cell <- cells if not_format_cell("source").length > 0) {
+        var format_cell = ""
+        for (cell_string <- not_format_cell("source"))
+          format_cell += cell_string
+        code += format_cell.replace("\n", "\\n").replace("\"", "\\\"")
+      }
+      val newSession = session.set("code", code.toList)
+      newSession
+    })
+  )
 
   val get_ipynb_json = exec(http("Get notebook Cells")
     .get("#{jupyter_url}" + "api/contents/Untitled.ipynb")
