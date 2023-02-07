@@ -18,8 +18,8 @@ class CreateJupyterlabSimulation extends Simulation {
 
   val printing = exec(session => {
       println("usage s3id: ")
-      println(session("s3id").as[String])
-      println(session("all").as[String])
+      println(session("element").as[String])
+      //println(session("all").as[String])
       session
     }  
   )
@@ -118,16 +118,17 @@ class CreateJupyterlabSimulation extends Simulation {
 
 
   val run_all_from_local = scenario("User_local")
-    .exec(create_jupyterlab)
-    .exec(printing)
-    .exec(create_kernel)
+    // .exec(create_jupyterlab)
+    // .exec(printing)
+    // .exec(create_kernel)
     .exec(read_ipynb_local)
-    .exec(connect_ws)
+    // .exec(connect_ws)
     .foreach("#{code}", "element") {
-      exec(run_single_cell)
+      //exec(run_single_cell)
+      exec(printing)
     }
-    .exec(close_connection_ws)
-    .exec(delete_kernel)
+    // .exec(close_connection_ws)
+    // .exec(delete_kernel)
 
   setUp(
     run_all_from_local.inject(rampUsers(Integer.getInteger("users", 5)).during(Integer.getInteger("ramp", 0)))
