@@ -18,8 +18,8 @@ class CreateJupyterlabSimulation extends Simulation {
 
   val printing = exec(session => {
       println("usage s3id: ")
-      println(session("element").as[String])
-      //println(session("all").as[String])
+      println(session("s3id").as[String])
+      println(session("all").as[String])
       session
     }  
   )
@@ -51,7 +51,7 @@ class CreateJupyterlabSimulation extends Simulation {
   val feeder_notebook = csv("notebooks.csv").random
 
   val read_ipynb_local = exec(
-    feed(feeder_notebooks)
+    feed(feeder_notebook)
       .exec(session => {
       var code = new ListBuffer[String]()
       val source = scala.io.Source.fromFile("src/test/resources/notebooks/" + session("notebook").as[String])
@@ -123,17 +123,16 @@ class CreateJupyterlabSimulation extends Simulation {
 
 
   val run_all_from_local = scenario("User_local")
-    // .exec(create_jupyterlab)
-    // .exec(printing)
-    // .exec(create_kernel)
+    .exec(create_jupyterlab)
+    .exec(printing)
+    .exec(create_kernel)
     .exec(read_ipynb_local)
-    // .exec(connect_ws)
+    .exec(connect_ws)
     .foreach("#{code}", "element") {
-      //exec(run_single_cell)
-      exec(printing)
+      exec(run_single_cell)
     }
-    // .exec(close_connection_ws)
-    // .exec(delete_kernel)
+    .exec(close_connection_ws)
+    .exec(delete_kernel)
 
   setUp(
     run_all_from_local.inject(rampUsers(Integer.getInteger("users", 5)).during(Integer.getInteger("ramp", 0)))
