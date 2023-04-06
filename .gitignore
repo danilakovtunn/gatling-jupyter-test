@@ -6,3 +6,5 @@ target
 .bsp
 .metals
 .vscode
+jupyterlab_datetime_errors/*
+label_studio_datetime_errors/*
