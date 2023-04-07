@@ -70,8 +70,8 @@ def main():
         for i in x:
             print(i.decode(), end='')
 
+        finish = datetime.datetime.now().isoformat(sep=' ', timespec='seconds')
         if len(x[-8].split()) < 3 or x[-8].split()[2] != b'0':
-            finish = datetime.datetime.now().isoformat(sep=' ', timespec='seconds')
             error_files = list(filter(lambda x: x[:-4].isdecimal() and x[-4:] == '.txt', os.listdir('jupyterlab_datetime_errors')))
             number = len(error_files) + 1
             with open('jupyterlab_datetime_errors/' + str(number) + '.txt', 'w') as f:
@@ -79,6 +79,8 @@ def main():
                     f.write(i.decode())
             with open('jupyterlab_datetime_errors/errors.txt', 'a') as f:
                 f.write(str(number) + ': ' + start + '     -     ' + finish + '\n')
+
+        print(start + '    -    ' + finish)
 
     if test_system == 'label_studio' or test_system == 'both':
         start = datetime.datetime.now().isoformat(sep=' ', timespec='seconds')

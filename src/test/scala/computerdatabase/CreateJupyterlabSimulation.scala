@@ -20,6 +20,7 @@ class CreateJupyterlabSimulation extends Simulation {
       println("usage s3id: ")
       println(session("s3id").as[String])
       println(session("all").as[String])
+      //println(session("element").as[String])
       session
     }  
   )
@@ -58,12 +59,13 @@ class CreateJupyterlabSimulation extends Simulation {
       val lines = try source.mkString finally source.close()
 
       val cells = jsonStrToMap(lines).asInstanceOf[Map[String, Any]]("cells").asInstanceOf[List[Map[String, List[String]]]]
-      for (not_format_cell <- cells if not_format_cell("source").length > 0) {
+      for (not_format_cell <- cells if not_format_cell("source").length > 0 && not_format_cell("cell_type") == "code") {
         var format_cell = ""
         for (cell_string <- not_format_cell("source"))
           format_cell += cell_string
         code += format_cell.replace("\n", "\\n").replace("\"", "\\\"")
-      }
+      } 
+      //code = code.slice(0, 24)
       val newSession = session.set("code", code.toList)
       newSession
     })
@@ -101,7 +103,7 @@ class CreateJupyterlabSimulation extends Simulation {
 
   val run_single_cell = exec(ws("Run single cell")
     .sendText(ElFileBody("ws_text.json"))
-    .await(51)(check_criterion)
+    .await(1000)(check_criterion)
   )
 
   val close_connection_ws = exec(ws("Close WS")
@@ -130,6 +132,7 @@ class CreateJupyterlabSimulation extends Simulation {
     .exec(connect_ws)
     .foreach("#{code}", "element") {
       exec(run_single_cell)
+      //.exec(printing)
     }
     .exec(close_connection_ws)
     .exec(delete_kernel)
