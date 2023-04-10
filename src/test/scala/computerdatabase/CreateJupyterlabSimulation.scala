@@ -71,6 +71,23 @@ class CreateJupyterlabSimulation extends Simulation {
     })
   )
 
+  val read_ipynb_local_requiers = exec(session => {
+    var code = new ListBuffer[String]()
+    val source = scala.io.Source.fromFile("src/test/resources/notebooks/requiers.ipynb")
+    val lines = try source.mkString finally source.close()
+
+    val cells = jsonStrToMap(lines).asInstanceOf[Map[String, Any]]("cells").asInstanceOf[List[Map[String, List[String]]]]
+    for (not_format_cell <- cells if not_format_cell("source").length > 0 && not_format_cell("cell_type") == "code") {
+      var format_cell = ""
+      for (cell_string <- not_format_cell("source"))
+        format_cell += cell_string
+      code += format_cell.replace("\n", "\\n").replace("\"", "\\\"")
+    } 
+    //code = code.slice(0, 24)
+    val newSession = session.set("code", code.toList)
+    newSession
+  })
+
   val get_ipynb_json = exec(http("Get notebook Cells")
     .get("#{jupyter_url}" + "api/contents/Untitled.ipynb")
     .headers(Map("Authorization"->"Token #{token}"))
@@ -127,6 +144,15 @@ class CreateJupyterlabSimulation extends Simulation {
   val run_all_from_local = scenario("User_local")
     .exec(create_jupyterlab)
     .exec(printing)
+    .exec(create_kernel)
+    .exec(read_ipynb_local_requiers)
+    .exec(connect_ws)
+    .foreach("#{code}", "element") {
+      exec(run_single_cell)
+      //.exec(printing)
+    }
+    .exec(close_connection_ws)
+    .exec(delete_kernel)
     .exec(create_kernel)
     .exec(read_ipynb_local)
     .exec(connect_ws)
