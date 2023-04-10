@@ -153,15 +153,15 @@ class CreateJupyterlabSimulation extends Simulation {
     }
     .exec(close_connection_ws)
     .exec(delete_kernel)
-    .exec(create_kernel)
-    .exec(read_ipynb_local)
-    .exec(connect_ws)
-    .foreach("#{code}", "element") {
-      exec(run_single_cell)
-      //.exec(printing)
-    }
-    .exec(close_connection_ws)
-    .exec(delete_kernel)
+    // .exec(create_kernel)
+    // .exec(read_ipynb_local)
+    // .exec(connect_ws)
+    // .foreach("#{code}", "element") {
+    //   exec(run_single_cell)
+    //   //.exec(printing)
+    // }
+    // .exec(close_connection_ws)
+    // .exec(delete_kernel)
 
   setUp(
     run_all_from_local.inject(rampUsers(Integer.getInteger("users", 5)).during(Integer.getInteger("ramp", 0)))
