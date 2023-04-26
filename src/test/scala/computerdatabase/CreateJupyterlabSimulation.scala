@@ -67,12 +67,12 @@ class CreateJupyterlabSimulation extends Simulation {
 
       val cells = jsonStrToMap(lines).asInstanceOf[Map[String, Any]]("cells").asInstanceOf[List[Map[String, List[String]]]]
       for (not_format_cell <- cells if not_format_cell("source").length > 0 && not_format_cell("cell_type") == "code") {
-        var format_cell = ""
+        var format_cell1 = ""
         for (cell_string <- not_format_cell("source"))
-          format_cell += cell_string
-        code1 += format_cell.replace("\n", "\\n").replace("\"", "\\\"")
+          format_cell1 += cell_string
+        code1 += format_cell1.replace("\n", "\\n").replace("\"", "\\\"")
       } 
-      //code = code.slice(0, 24)
+      //code1 = code1.slice(0, 24)
       val newSession = session.set("code1", code1.toList)
       newSession
     })
@@ -111,6 +111,12 @@ class CreateJupyterlabSimulation extends Simulation {
   })
   
   val delete_kernel = exec(http("Delete Kernel")
+    .delete("#{jupyter_url}" + "api/kernels/#{kernel_id}")
+    .headers(Map("Authorization"->"Token #{token}"))
+    .check(status is 204)
+  )
+
+  val delete_kernel1 = exec(http("Delete Kernel")
     .delete("#{jupyter_url}" + "api/kernels/#{kernel_id1}")
     .headers(Map("Authorization"->"Token #{token}"))
     .check(status is 204)
@@ -125,8 +131,18 @@ class CreateJupyterlabSimulation extends Simulation {
     .headers(Map("Authorization"->"Token #{token}"))
   )
 
+  val connect_ws1 = exec(ws("Connect WS")
+    .connect(session => "ws" + session("jupyter_url").as[String].substring(4) + "api/kernels/" + session("kernel_id1").as[String] + "/channels")
+    .headers(Map("Authorization"->"Token #{token}"))
+  )
+
   val run_single_cell = exec(ws("Run single cell")
     .sendText(ElFileBody("ws_text.json"))
+    .await(1000)(check_criterion)
+  )
+
+  val run_single_cell1 = exec(ws("Run single cell")
+    .sendText(ElFileBody("ws_text1.json"))
     .await(1000)(check_criterion)
   )
 
@@ -162,13 +178,13 @@ class CreateJupyterlabSimulation extends Simulation {
     .exec(delete_kernel)
     .exec(create_kernel1)
     .exec(read_ipynb_local)
-    .exec(connect_ws)
-    .foreach("#{code1}", "element") {
-      exec(run_single_cell)
+    .exec(connect_ws1)
+    .foreach("#{code1}", "element1") {
+      exec(run_single_cell1)
       //.exec(printing)
     }
     .exec(close_connection_ws)
-    .exec(delete_kernel)
+    .exec(delete_kernel1)
 
   setUp(
     run_all_from_local.inject(rampUsers(Integer.getInteger("users", 5)).during(Integer.getInteger("ramp", 0)))
