@@ -17,10 +17,10 @@ class CreateJupyterlabSimulation extends Simulation {
 
 
   val printing = exec(session => {
-      println("usage s3id: ")
-      println(session("s3id").as[String])
-      println(session("all").as[String])
-      //println(session("element").as[String])
+      //println("usage s3id: ")
+      //println(session("s3id").as[String])
+      //println(session("all").as[String])
+      println(session("element1").as[String])
       session
     }  
   )
@@ -28,7 +28,7 @@ class CreateJupyterlabSimulation extends Simulation {
   val httpProtocol =
     http.baseUrl("http://localhost:8888")
   
-  val feeder_jupyterlab = csv("jupyterlab.csv").random
+  val feeder_jupyterlab = csv("jupyterlab.csv").queue
 
   val create_jupyterlab = exec(
     feed(feeder_jupyterlab)
@@ -166,7 +166,7 @@ class CreateJupyterlabSimulation extends Simulation {
 
   val run_all_from_local = scenario("User_local")
     .exec(create_jupyterlab)
-    .exec(printing)
+    //.exec(printing)
     .exec(create_kernel)
     .exec(read_ipynb_local_requiers)
     .exec(connect_ws)
@@ -181,7 +181,7 @@ class CreateJupyterlabSimulation extends Simulation {
     .exec(connect_ws1)
     .foreach("#{code1}", "element1") {
       exec(run_single_cell1)
-      //.exec(printing)
+      .exec(printing)
     }
     .exec(close_connection_ws)
     .exec(delete_kernel1)
